@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Yago Bomfim | Plataforma de Simulados</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ybbg: '#FAF9F5',
+          ybgreen: '#0F3D2A',
+          ybgreendark: '#0A2B1D',
+          ybgold: '#C9A227',
+          ybgoldlight: '#E4CE7C',
+          ybink: '#1C1C1A'
+        },
+        fontFamily: {
+          sans: ['Poppins', 'sans-serif'],
+          display: ['Lora', 'serif']
+        },
+        boxShadow: {
+          yb: '0 10px 30px -12px rgba(15,61,42,0.25)'
+        }
+      }
+    }
+  };
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<style>
+  body { font-family: 'Poppins', sans-serif; background-color:#FAF9F5; }
+  .font-display { font-family: 'Lora', serif; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #C9A227; border-radius: 999px; }
+  ::-webkit-scrollbar-track { background: #EDEAE0; }
+  .fade-in { animation: fadeIn .35s ease both; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(6px);} to {opacity:1; transform:translateY(0);} }
+  .alt-option:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
+    outline: 2px solid #C9A227; outline-offset: 2px;
+  }
+  .bar-fill { transition: width .8s cubic-bezier(.16,1,.3,1); }
+</style>
+</head>
+<body class="min-h-screen text-[#1C1C1A] antialiased">
+
+<div id="app"></div>
+
+<script>
+/* =========================================================
+   BANCO DE DADOS MOCK — SIMULADO 1 - MÉTODO YB
+   ========================================================= */
+const SIMULADO = {
+  id: 'sim-001',
+  titulo: 'Simulado 1 - Método YB',
+  descricao: 'Avaliação diagnóstica multidisciplinar com questões comentadas alternativa por alternativa.',
+  questoes: [
+    {
+      id: 1,
+      disciplina: 'Matemática',
+      tipo: 'objetiva',
+      enunciado: 'Um trem percorre uma distância de 120 km em 2 horas, mantendo velocidade constante. Qual é a velocidade média do trem, em km/h? A velocidade média é dada por $v = \\dfrac{d}{t}$.',
+      imagem: null,
+      alternativaCorreta: 'C',
+      alternativas: [
+        { letra: 'A', texto: '40 km/h', comentario: 'Incorreto. Esse valor corresponderia a percorrer 120 km em 3 horas, o que não condiz com o enunciado (2 horas).' },
+        { letra: 'B', texto: '50 km/h', comentario: 'Incorreto. Esse número não resulta da divisão correta entre a distância (120 km) e o tempo (2 h).' },
+        { letra: 'C', texto: '60 km/h', comentario: 'Correto! Aplicando a fórmula v = d/t, temos v = 120 ÷ 2 = 60 km/h.' },
+        { letra: 'D', texto: '70 km/h', comentario: 'Incorreto. Valor superior ao resultado real da divisão 120 ÷ 2 = 60.' },
+        { letra: 'E', texto: '80 km/h', comentario: 'Incorreto. Esse seria o resultado aproximado se o tempo considerado fosse 1,5 hora, o que não é o caso.' }
+      ]
+    },
+    {
+      id: 2,
+      disciplina: 'Física',
+      tipo: 'objetiva',
+      enunciado: 'Um corpo de massa 2 kg está sujeito a uma força resultante de 10 N. De acordo com a Segunda Lei de Newton, expressa por $F = m \\cdot a$, qual é a aceleração adquirida por esse corpo?',
+      imagem: '/imagens_simulado/questao2_diagrama_forca.png',
+      alternativaCorreta: 'B',
+      alternativas: [
+        { letra: 'A', texto: '2 m/s²', comentario: 'Incorreto. Esse valor seria obtido apenas se a força resultante fosse de 4 N, e não 10 N.' },
+        { letra: 'B', texto: '5 m/s²', comentario: 'Correto! Isolando a aceleração na fórmula F = m·a, temos a = F/m = 10/2 = 5 m/s².' },
+        { letra: 'C', texto: '10 m/s²', comentario: 'Incorreto. Esse valor ignora a divisão pela massa do corpo (repete o valor da força).' },
+        { letra: 'D', texto: '20 m/s²', comentario: 'Incorreto. Esse resultado seria obtido multiplicando F por m, e não dividindo F por m.' },
+        { letra: 'E', texto: '0,2 m/s²', comentario: 'Incorreto. Esse valor inverte a relação correta, calculando m/F em vez de F/m.' }
+      ]
+    },
+    {
+      id: 3,
+      disciplina: 'História',
+      tipo: 'objetiva',
+      enunciado: 'O processo de independência do Brasil, consolidado em 1822, é fortemente associado a um episódio simbólico ocorrido às margens do rio Ipiranga, em São Paulo. Qual alternativa identifica corretamente esse marco?',
+      imagem: null,
+      alternativaCorreta: 'C',
+      alternativas: [
+        { letra: 'A', texto: 'Assinatura da Lei Áurea', comentario: 'Incorreto. A Lei Áurea, de 1888, aboliu a escravidão no Brasil e não tem relação direta com a Independência.' },
+        { letra: 'B', texto: 'Proclamação da República', comentario: 'Incorreto. Esse evento ocorreu em 1889, décadas após a Independência, e encerrou o período monárquico.' },
+        { letra: 'C', texto: 'Grito do Ipiranga', comentario: 'Correto! Em 7 de setembro de 1822, Dom Pedro I proclamou a Independência do Brasil às margens do rio Ipiranga.' },
+        { letra: 'D', texto: 'Revolução Pernambucana', comentario: 'Incorreto. Ocorreu em 1817, antes da Independência, com caráter separatista e republicano regional.' },
+        { letra: 'E', texto: 'Conjuração Mineira', comentario: 'Incorreto. Movimento ocorrido em 1789 contra a Coroa portuguesa, muito anterior ao processo de Independência.' }
+      ]
+    },
+    {
+      id: 4,
+      disciplina: 'Química',
+      tipo: 'objetiva',
+      enunciado: 'Em condições de 25 °C, qual é o valor aproximado de pH de uma solução aquosa considerada neutra?',
+      imagem: null,
+      alternativaCorreta: 'C',
+      alternativas: [
+        { letra: 'A', texto: '0', comentario: 'Incorreto. Esse valor indica uma solução extremamente ácida, e não neutra.' },
+        { letra: 'B', texto: '3', comentario: 'Incorreto. Esse valor representa uma solução ácida, ainda distante da neutralidade.' },
+        { letra: 'C', texto: '7', comentario: 'Correto! A 25 °C, a água pura apresenta pH igual a 7, valor de referência para soluções neutras.' },
+        { letra: 'D', texto: '10', comentario: 'Incorreto. Esse valor indica uma solução básica (alcalina), acima da neutralidade.' },
+        { letra: 'E', texto: '14', comentario: 'Incorreto. Esse é o valor mais alto da escala de pH, representando uma base forte.' }
+      ]
+    },
+    {
+      id: 5,
+      disciplina: 'Português',
+      tipo: 'objetiva',
+      enunciado: 'Leia o trecho: "Seus olhos eram dois faróis iluminando a escuridão da noite." Essa construção exemplifica qual figura de linguagem?',
+      imagem: null,
+      alternativaCorreta: 'C',
+      alternativas: [
+        { letra: 'A', texto: 'Metonímia', comentario: 'Incorreto. A metonímia substitui um termo por outro com relação de contiguidade ou proximidade de sentido, o que não ocorre aqui.' },
+        { letra: 'B', texto: 'Hipérbole', comentario: 'Incorreto. Não há exagero explícito de proporções; o que existe é uma comparação implícita entre dois elementos.' },
+        { letra: 'C', texto: 'Metáfora', comentario: 'Correto! Há uma comparação implícita entre "olhos" e "faróis", sem o uso do conectivo comparativo "como".' },
+        { letra: 'D', texto: 'Antítese', comentario: 'Incorreto. A antítese aproxima ideias opostas, o que não é o caso na frase apresentada.' },
+        { letra: 'E', texto: 'Eufemismo', comentario: 'Incorreto. O eufemismo suaviza uma ideia desagradável ou chocante, o que não ocorre no trecho.' }
+      ]
+    },
+    {
+      id: 6,
+      disciplina: 'Português',
+      tipo: 'discursiva',
+      enunciado: 'Disserte, em até 15 linhas, sobre a importância da leitura crítica de textos para a formação do pensamento argumentativo do estudante. Justifique sua resposta com exemplos.',
+      imagem: null
+    }
+  ]
+};
+
+/* =========================================================
+   ESTADO DA APLICAÇÃO
+   ========================================================= */
+const state = {
+  tela: 'login',            // login | dashboard | prova | resultado
+  loginErro: '',
+  statusSimulado: 'nao_iniciado', // nao_iniciado | em_andamento | concluido
+  indiceAtual: 0,
+  respostas: {},             // { questaoId: 'A'|'B'... }
+  discursivas: {},           // { questaoId: texto }
+  grade_aberta: false
+};
+
+const objetivas = SIMULADO.questoes.filter(q => q.tipo === 'objetiva');
+const totalQuestoes = SIMULADO.questoes.length;
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+function el(html) {
+  const t = document.createElement('template');
+  t.innerHTML = html.trim();
+  return t.content.firstElementChild;
+}
+
+function renderMath() {
+  if (window.renderMathInElement) {
+    renderMathInElement(document.getElementById('app'), {
+      delimiters: [{ left: '$', right: '$', display: false }],
+      throwOnError: false
+    });
+  }
+}
+
+function iconeCheck(cls) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+}
+function iconeX(cls) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+}
+
+/* =========================================================
+   TELA: LOGIN
+   ========================================================= */
+function telaLogin() {
+  return `
+  <div class="min-h-screen flex items-center justify-center px-4 fade-in">
+    <div class="w-full max-w-md">
+      <div class="flex flex-col items-center mb-8">
+        <div class="w-16 h-16 rounded-full bg-ybgreen flex items-center justify-center shadow-yb">
+          <span class="font-display text-ybgold text-2xl font-bold tracking-wide">YB</span>
+        </div>
+        <h1 class="font-display text-2xl font-bold text-ybgreen mt-4">Yago Bomfim</h1>
+        <p class="text-sm text-[#6b6a63] mt-1">Plataforma de Simulados &middot; Método YB</p>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-yb border border-black/5 p-8">
+        <h2 class="font-display text-lg font-semibold text-ybink mb-6">Acesse sua conta</h2>
+
+        <form id="form-login" class="space-y-4" novalidate>
+          <div>
+            <label class="block text-xs font-medium text-[#6b6a63] mb-1.5" for="email">E-mail</label>
+            <input id="email" type="email" placeholder="seuemail@exemplo.com"
+              class="w-full rounded-lg border border-black/10 px-3.5 py-2.5 text-sm focus:border-ybgold transition-colors" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-[#6b6a63] mb-1.5" for="senha">Senha</label>
+            <input id="senha" type="password" placeholder="Digite sua senha"
+              class="w-full rounded-lg border border-black/10 px-3.5 py-2.5 text-sm focus:border-ybgold transition-colors" />
+          </div>
+
+          ${state.loginErro ? `<p class="text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">${state.loginErro}</p>` : ''}
+
+          <button type="submit"
+            class="w-full bg-ybgreen hover:bg-ybgreendark text-white font-medium rounded-lg py-2.5 text-sm transition-colors shadow-yb">
+            Entrar na plataforma
+          </button>
+        </form>
+      </div>
+      <p class="text-center text-[11px] text-[#a3a196] mt-6">Método YB &copy; 2026 &middot; Ambiente de simulados educacionais</p>
+    </div>
+  </div>`;
+}
+
+function eventosLogin() {
+  document.getElementById('form-login').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('senha').value.trim();
+    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    if (!emailValido) {
+      state.loginErro = 'Informe um e-mail válido para continuar.';
+      render();
+      return;
+    }
+    if (senha.length < 3) {
+      state.loginErro = 'A senha deve ter pelo menos 3 caracteres.';
+      render();
+      return;
+    }
+    state.loginErro = '';
+    state.tela = 'dashboard';
+    render();
+  });
+}
+
+/* =========================================================
+   TELA: DASHBOARD
+   ========================================================= */
+function telaDashboard() {
+  const badge = {
+    nao_iniciado: { texto: 'Não iniciado', cls: 'bg-[#EDEAE0] text-[#6b6a63]' },
+    em_andamento: { texto: 'Em andamento', cls: 'bg-ybgoldlight/40 text-ybgreendark' },
+    concluido: { texto: 'Concluído', cls: 'bg-ybgreen/10 text-ybgreen' }
+  }[state.statusSimulado];
+
+  return `
+  <div class="min-h-screen fade-in">
+    <header class="border-b border-black/5 bg-white/70 backdrop-blur sticky top-0 z-10">
+      <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-ybgreen flex items-center justify-center">
+            <span class="font-display text-ybgold text-sm font-bold">YB</span>
+          </div>
+          <span class="font-display font-semibold text-ybgreen">Yago Bomfim</span>
+        </div>
+        <button id="btn-sair" class="text-xs text-[#6b6a63] hover:text-ybgreen transition-colors">Sair</button>
+      </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 py-10">
+      <h1 class="font-display text-2xl font-bold text-ybink mb-1">Seus simulados</h1>
+      <p class="text-sm text-[#6b6a63] mb-8">Escolha um simulado para iniciar sua preparação.</p>
+
+      <div class="bg-white rounded-2xl shadow-yb border border-black/5 p-6 flex flex-col sm:flex-row sm:items-center gap-6">
+        <div class="w-14 h-14 rounded-xl bg-ybgreen/10 flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-ybgreen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        </div>
+
+        <div class="flex-1">
+          <div class="flex items-center gap-2 flex-wrap mb-1">
+            <h2 class="font-display font-semibold text-lg text-ybink">${SIMULADO.titulo}</h2>
+            <span class="text-[11px] font-medium px-2.5 py-0.5 rounded-full ${badge.cls}">${badge.texto}</span>
+          </div>
+          <p class="text-sm text-[#6b6a63] mb-3">${SIMULADO.descricao}</p>
+          <div class="flex items-center gap-4 text-xs text-[#6b6a63]">
+            <span class="flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              ${totalQuestoes} questões
+            </span>
+            <span class="flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              5 disciplinas
+            </span>
+          </div>
+        </div>
+
+        <button id="btn-iniciar" class="shrink-0 bg-ybgreen hover:bg-ybgreendark text-white text-sm font-medium rounded-lg px-5 py-2.5 transition-colors shadow-yb whitespace-nowrap">
+          ${state.statusSimulado === 'concluido' ? 'Ver resultado' : (state.statusSimulado === 'em_andamento' ? 'Continuar simulado' : 'Iniciar simulado')}
+        </button>
+      </div>
+    </main>
+  </div>`;
+}
+
+function eventosDashboard() {
+  document.getElementById('btn-iniciar').addEventListener('click', () => {
+    if (state.statusSimulado === 'concluido') {
+      state.tela = 'resultado';
+    } else {
+      state.statusSimulado = 'em_andamento';
+      state.tela = 'prova';
+    }
+    render();
+  });
+  document.getElementById('btn-sair').addEventListener('click', () => {
+    state.tela = 'login';
+    render();
+  });
+}
+
+/* =========================================================
+   TELA: PROVA (AMBIENTE DE PROVA)
+   ========================================================= */
+function telaProva() {
+  const q = SIMULADO.questoes[state.indiceAtual];
+  const progresso = Math.round(((state.indiceAtual + 1) / totalQuestoes) * 100);
+  const ehUltima = state.indiceAtual === totalQuestoes - 1;
+  const respondida = q.tipo === 'objetiva' ? !!state.respostas[q.id] : !!(state.discursivas[q.id] && state.discursivas[q.id].trim().length > 0);
+
+  const alternativasHTML = q.tipo === 'objetiva' ? `
+    <div class="space-y-3 mt-6">
+      ${q.alternativas.map(a => {
+        const selecionada = state.respostas[q.id] === a.letra;
+        return `
+        <button data-letra="${a.letra}" class="alt-option w-full text-left flex items-start gap-3 rounded-xl border px-4 py-3.5 transition-all
+          ${selecionada ? 'border-ybgreen bg-ybgreen/5 ring-1 ring-ybgreen' : 'border-black/10 hover:border-ybgold/60 hover:bg-ybgold/5'}">
+          <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0
+            ${selecionada ? 'bg-ybgreen text-white' : 'bg-[#EDEAE0] text-[#6b6a63]'}">${a.letra}</span>
+          <span class="text-sm text-ybink pt-0.5">${a.texto}</span>
+        </button>`;
+      }).join('')}
+    </div>` : `
+    <div class="mt-6">
+      <textarea id="resposta-discursiva" rows="8" placeholder="Digite sua resposta aqui..."
+        class="w-full rounded-xl border border-black/10 px-4 py-3 text-sm focus:border-ybgold transition-colors resize-none">${state.discursivas[q.id] || ''}</textarea>
+      <p class="text-[11px] text-[#a3a196] mt-2">Questão discursiva &middot; correção manual pelo professor.</p>
+    </div>`;
+
+  const imagemHTML = q.imagem ? `
+    <div class="mt-5 rounded-xl border border-black/10 overflow-hidden bg-[#F4F3EE]">
+      <img src="${q.imagem}" alt="Imagem de apoio da questão ${q.id}" class="w-full max-h-72 object-contain"
+        onerror="this.style.display='none'; document.getElementById('img-fallback-${q.id}').style.display='block';" />
+      <div id="img-fallback-${q.id}" style="display:none" class="p-6 text-center text-xs text-[#a3a196]">
+        Imagem de apoio não encontrada neste ambiente: <span class="font-mono">${q.imagem}</span>
+      </div>
+    </div>` : '';
+
+  return `
+  <div class="min-h-screen fade-in pb-28">
+    <header class="border-b border-black/5 bg-white sticky top-0 z-10">
+      <div class="max-w-3xl mx-auto px-6 py-4">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-ybgreen flex items-center justify-center">
+              <span class="font-display text-ybgold text-xs font-bold">YB</span>
+            </div>
+            <span class="text-sm font-medium text-ybink">${SIMULADO.titulo}</span>
+          </div>
+          <button id="btn-grade" class="flex items-center gap-1.5 text-xs font-medium text-ybgreen border border-ybgreen/30 rounded-lg px-3 py-1.5 hover:bg-ybgreen/5 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            Cartão-resposta
+          </button>
+        </div>
+        <div class="flex items-center justify-between text-[11px] text-[#6b6a63] mb-1.5">
+          <span>Questão ${state.indiceAtual + 1} de ${totalQuestoes}</span>
+          <span>${progresso}% concluído</span>
+        </div>
+        <div class="w-full h-1.5 rounded-full bg-[#EDEAE0] overflow-hidden">
+          <div class="h-full bg-ybgold bar-fill" style="width:${progresso}%"></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-6 py-8">
+      <div class="bg-white rounded-2xl shadow-yb border border-black/5 p-7">
+        <span class="inline-block text-[11px] font-semibold tracking-wide uppercase text-ybgold bg-ybgreen/5 rounded-full px-3 py-1 mb-4">${q.disciplina}</span>
+        <p class="font-display text-[17px] leading-relaxed text-ybink">${q.enunciado}</p>
+        ${imagemHTML}
+        ${alternativasHTML}
+      </div>
+    </main>
+
+    <div class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-black/5">
+      <div class="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+        <button id="btn-voltar" ${state.indiceAtual === 0 ? 'disabled' : ''}
+          class="text-sm font-medium px-5 py-2.5 rounded-lg border border-black/10 transition-colors
+          ${state.indiceAtual === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-black/5'}">
+          Voltar
+        </button>
+        <span class="text-xs text-[#a3a196]">${respondida ? 'Resposta registrada' : 'Aguardando resposta'}</span>
+        <button id="btn-avancar"
+          class="text-sm font-medium px-5 py-2.5 rounded-lg text-white transition-colors shadow-yb
+          ${ehUltima ? 'bg-ybgold hover:brightness-95 text-ybgreendark font-semibold' : 'bg-ybgreen hover:bg-ybgreendark'}">
+          ${ehUltima ? 'Finalizar simulado' : 'Avançar'}
+        </button>
+      </div>
+    </div>
+
+    ${state.grade_aberta ? modalGrade() : ''}
+  </div>`;
+}
+
+function modalGrade() {
+  return `
+  <div id="overlay-grade" class="fixed inset-0 bg-black/40 z-20 flex items-end sm:items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-yb w-full max-w-md p-6 fade-in">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-display font-semibold text-ybink">Cartão-resposta</h3>
+        <button id="btn-fechar-grade" class="text-[#a3a196] hover:text-ybink">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="grid grid-cols-5 gap-2.5">
+        ${SIMULADO.questoes.map((q, i) => {
+          const respondida = q.tipo === 'objetiva' ? !!state.respostas[q.id] : !!(state.discursivas[q.id] && state.discursivas[q.id].trim());
+          const atual = i === state.indiceAtual;
+          return `<button data-indice="${i}" class="btn-grade-item aspect-square rounded-lg text-sm font-medium border transition-colors
+            ${atual ? 'border-ybgold ring-2 ring-ybgold bg-ybgold/10 text-ybgreendark' : respondida ? 'bg-ybgreen text-white border-ybgreen' : 'bg-[#F4F3EE] text-[#6b6a63] border-black/5 hover:border-ybgold/50'}">
+            ${i + 1}
+          </button>`;
+        }).join('')}
+      </div>
+      <div class="flex items-center gap-4 mt-5 text-[11px] text-[#6b6a63]">
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-ybgreen inline-block"></span>Respondida</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-[#F4F3EE] border border-black/10 inline-block"></span>Pendente</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-ybgold/10 border border-ybgold inline-block"></span>Atual</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function eventosProva() {
+  const q = SIMULADO.questoes[state.indiceAtual];
+
+  if (q.tipo === 'objetiva') {
+    document.querySelectorAll('.alt-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.respostas[q.id] = btn.dataset.letra;
+        render();
+      });
+    });
+  } else {
+    const textarea = document.getElementById('resposta-discursiva');
+    textarea.addEventListener('input', () => {
+      state.discursivas[q.id] = textarea.value;
+    });
+  }
+
+  document.getElementById('btn-voltar').addEventListener('click', () => {
+    if (state.indiceAtual > 0) {
+      state.indiceAtual -= 1;
+      render();
+    }
+  });
+
+  document.getElementById('btn-avancar').addEventListener('click', () => {
+    if (state.indiceAtual < totalQuestoes - 1) {
+      state.indiceAtual += 1;
+      render();
+    } else {
+      state.statusSimulado = 'concluido';
+      state.tela = 'resultado';
+      render();
+    }
+  });
+
+  document.getElementById('btn-grade').addEventListener('click', () => {
+    state.grade_aberta = true;
+    render();
+  });
+
+  if (state.grade_aberta) {
+    document.getElementById('btn-fechar-grade').addEventListener('click', () => {
+      state.grade_aberta = false;
+      render();
+    });
+    document.getElementById('overlay-grade').addEventListener('click', (e) => {
+      if (e.target.id === 'overlay-grade') { state.grade_aberta = false; render(); }
+    });
+    document.querySelectorAll('.btn-grade-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.indiceAtual = parseInt(btn.dataset.indice, 10);
+        state.grade_aberta = false;
+        render();
+      });
+    });
+  }
+}
+
+/* =========================================================
+   TELA: RESULTADO E GABARITO COMENTADO
+   ========================================================= */
+function telaResultado() {
+  const acertos = objetivas.filter(q => state.respostas[q.id] === q.alternativaCorreta).length;
+  const percentual = Math.round((acertos / objetivas.length) * 100);
+
+  const discursiva = SIMULADO.questoes.find(q => q.tipo === 'discursiva');
+  const respostaDiscursiva = (state.discursivas[discursiva.id] || '').trim();
+
+  const desempenhoDisciplina = objetivas.map(q => {
+    const acertou = state.respostas[q.id] === q.alternativaCorreta;
+    return { disciplina: q.disciplina, acertou };
+  });
+
+  return `
+  <div class="min-h-screen fade-in">
+    <header class="border-b border-black/5 bg-white sticky top-0 z-10">
+      <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-ybgreen flex items-center justify-center">
+            <span class="font-display text-ybgold text-sm font-bold">YB</span>
+          </div>
+          <span class="font-display font-semibold text-ybgreen">${SIMULADO.titulo} &middot; Resultado</span>
+        </div>
+        <button id="btn-dashboard" class="text-xs text-[#6b6a63] hover:text-ybgreen transition-colors">Voltar ao painel</button>
+      </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-6 py-10 space-y-8">
+
+      <section class="grid sm:grid-cols-3 gap-4">
+        <div class="sm:col-span-1 bg-ybgreen text-white rounded-2xl shadow-yb p-6 flex flex-col items-center justify-center text-center">
+          <span class="text-4xl font-display font-bold">${percentual}%</span>
+          <span class="text-xs text-ybgoldlight mt-1">de aproveitamento</span>
+          <span class="text-[11px] text-white/70 mt-3">${acertos} de ${objetivas.length} questões objetivas corretas</span>
+        </div>
+
+        <div class="sm:col-span-2 bg-white rounded-2xl shadow-yb border border-black/5 p-6">
+          <h3 class="font-display font-semibold text-ybink mb-4 text-sm">Desempenho por disciplina</h3>
+          <div class="space-y-3">
+            ${desempenhoDisciplina.map(d => `
+              <div>
+                <div class="flex items-center justify-between text-xs mb-1">
+                  <span class="text-[#4a4a44] font-medium">${d.disciplina}</span>
+                  <span class="${d.acertou ? 'text-ybgreen' : 'text-red-500'} font-semibold">${d.acertou ? '100%' : '0%'}</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-[#EDEAE0] overflow-hidden">
+                  <div class="h-full bar-fill ${d.acertou ? 'bg-ybgreen' : 'bg-red-400'}" style="width:${d.acertou ? 100 : 6}%"></div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="font-display text-lg font-bold text-ybink mb-4">Gabarito comentado</h2>
+        <div class="space-y-5">
+          ${objetivas.map((q, idx) => {
+            const escolhida = state.respostas[q.id];
+            const acertou = escolhida === q.alternativaCorreta;
+            return `
+            <div class="bg-white rounded-2xl shadow-yb border border-black/5 p-6">
+              <div class="flex items-center gap-2 flex-wrap mb-2">
+                <span class="text-[11px] font-semibold tracking-wide uppercase text-ybgold bg-ybgreen/5 rounded-full px-3 py-1">${q.disciplina}</span>
+                <span class="text-[11px] font-medium px-2.5 py-0.5 rounded-full ${acertou ? 'bg-ybgreen/10 text-ybgreen' : 'bg-red-50 text-red-500'}">
+                  Questão ${idx + 1} &middot; ${acertou ? 'Acertou' : (escolhida ? 'Errou' : 'Não respondida')}
+                </span>
+              </div>
+              <p class="font-display text-[15px] leading-relaxed text-ybink mb-4">${q.enunciado}</p>
+
+              <div class="space-y-2.5">
+                ${q.alternativas.map(a => {
+                  const eCorreta = a.letra === q.alternativaCorreta;
+                  const eEscolhida = a.letra === escolhida;
+                  let borda = 'border-black/10';
+                  if (eCorreta) borda = 'border-ybgreen';
+                  else if (eEscolhida) borda = 'border-red-300';
+                  return `
+                  <div class="rounded-xl border ${borda} px-4 py-3 ${eCorreta ? 'bg-ybgreen/5' : (eEscolhida ? 'bg-red-50/60' : '')}">
+                    <div class="flex items-start gap-3">
+                      <span class="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-semibold shrink-0 mt-0.5
+                        ${eCorreta ? 'bg-ybgreen text-white' : (eEscolhida ? 'bg-red-400 text-white' : 'bg-[#EDEAE0] text-[#6b6a63]')}">${a.letra}</span>
+                      <div class="flex-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <span class="text-sm text-ybink">${a.texto}</span>
+                          ${eCorreta ? `<span class="flex items-center gap-1 text-[11px] font-medium text-ybgreen">${iconeCheck('w-3.5 h-3.5')} correta</span>` : ''}
+                          ${eEscolhida && !eCorreta ? `<span class="flex items-center gap-1 text-[11px] font-medium text-red-500">${iconeX('w-3.5 h-3.5')} sua resposta</span>` : ''}
+                        </div>
+                        <p class="text-xs text-[#6b6a63] mt-1 leading-relaxed">${a.comentario}</p>
+                      </div>
+                    </div>
+                  </div>`;
+                }).join('')}
+              </div>
+            </div>`;
+          }).join('')}
+
+          <div class="bg-white rounded-2xl shadow-yb border border-black/5 p-6">
+            <div class="flex items-center gap-2 flex-wrap mb-2">
+              <span class="text-[11px] font-semibold tracking-wide uppercase text-ybgold bg-ybgreen/5 rounded-full px-3 py-1">${discursiva.disciplina} &middot; Discursiva</span>
+              <span class="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-[#EDEAE0] text-[#6b6a63]">Correção manual</span>
+            </div>
+            <p class="font-display text-[15px] leading-relaxed text-ybink mb-4">${discursiva.enunciado}</p>
+            <div class="rounded-xl border border-black/10 px-4 py-3 bg-[#FAF9F5]">
+              <p class="text-xs font-medium text-[#6b6a63] mb-1.5">Sua resposta:</p>
+              <p class="text-sm text-ybink whitespace-pre-wrap">${respostaDiscursiva || '<span class="text-[#a3a196] italic">Nenhuma resposta enviada.</span>'}</p>
+            </div>
+            <p class="text-[11px] text-[#a3a196] mt-3">Esta questão será avaliada individualmente pelo corpo docente do Método YB.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>`;
+}
+
+function eventosResultado() {
+  document.getElementById('btn-dashboard').addEventListener('click', () => {
+    state.tela = 'dashboard';
+    render();
+  });
+}
+
+/* =========================================================
+   RENDER PRINCIPAL
+   ========================================================= */
+function render() {
+  const app = document.getElementById('app');
+
+  if (state.tela === 'login') {
+    app.innerHTML = telaLogin();
+    eventosLogin();
+  } else if (state.tela === 'dashboard') {
+    app.innerHTML = telaDashboard();
+    eventosDashboard();
+  } else if (state.tela === 'prova') {
+    app.innerHTML = telaProva();
+    eventosProva();
+    renderMath();
+  } else if (state.tela === 'resultado') {
+    app.innerHTML = telaResultado();
+    eventosResultado();
+  }
+}
+
+render();
+</script>
+</body>
+</html>
